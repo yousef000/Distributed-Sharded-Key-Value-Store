@@ -1,0 +1,54 @@
+version: "3"
+
+networks:
+  assignment3-net:
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.10.0.0/16
+
+services:
+  replica1: #instance of container
+    container_name: replica1
+    build: .
+    environment: #environment variables
+      - SOCKET_ADDRESS=10.10.0.2:8080
+      - VIEW=10.10.0.2:8080,10.10.0.3:8080,10.10.0.4:8080
+    ports: #Port mapping
+      - "8082:8080"
+    networks: #network this instance is linked to
+      assignment3-net:
+        ipv4_address: "10.10.0.2" #static IP for this container
+    volumes: # the bread and butter, allows live reloading every time you save
+      - .:/app # <local directory>/<container-directory>
+    restart: on-failure # restarts a container upon failure
+
+  replica2:
+    container_name: replica2
+    build: .
+    environment:
+      - SOCKET_ADDRESS=10.10.0.3:8080
+      - VIEW=10.10.0.2:8080,10.10.0.3:8080,10.10.0.4:8080
+    ports:
+      - "8083:8080"
+    networks:
+      assignment3-net:
+        ipv4_address: "10.10.0.3"
+    volumes:
+      - .:/app
+    restart: on-failure
+
+  replica3:
+    container_name: replica3
+    build: .
+    environment:
+      - SOCKET_ADDRESS=10.10.0.4:8080
+      - VIEW=10.10.0.2:8080,10.10.0.3:8080,10.10.0.4:8080
+    ports:
+      - "8084:8080"
+    networks:
+      assignment3-net:
+        ipv4_address: "10.10.0.4"
+    volumes:
+      - .:/app
+    restart: on-failure
